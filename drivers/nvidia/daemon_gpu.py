@@ -470,7 +470,14 @@ def _parse_vf_point(raw: dict) -> VfPoint:
         "current_offset_khz",
     )
     try:
-        return VfPoint(**{field: int(raw[field]) for field in fields})
+        parsed = {field: int(raw[field]) for field in fields}
+        if parsed.get("base_freq_khz", 0) <= 0:
+            parsed["base_freq_khz"] = max(
+                parsed.get("freq_khz", 0) - parsed.get("current_offset_khz", 0), 0
+            )
+        if parsed.get("base_voltage_uv", 0) <= 0:
+            parsed["base_voltage_uv"] = parsed.get("voltage_uv", 0)
+        return VfPoint(**parsed)
     except (KeyError, TypeError, ValueError) as exc:
         raise RuntimeError(
             "PenguinBurner daemon returned an invalid V/F point"

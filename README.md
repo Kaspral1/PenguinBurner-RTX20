@@ -11,7 +11,7 @@
 </p>
 <p align="center">
   <img alt="Platform" src="https://img.shields.io/badge/platform-Linux-FCC624?style=flat-square&logo=linux&logoColor=black">
-  <img alt="GPU" src="https://img.shields.io/badge/GPU-NVIDIA%20RTX%2030%2F40%2F50-76B900?style=flat-square&logo=nvidia&logoColor=white">
+  <img alt="GPU" src="https://img.shields.io/badge/GPU-NVIDIA%20RTX%2020%2F30%2F40%2F50-76B900?style=flat-square&logo=nvidia&logoColor=white">
   <img alt="Vulkan" src="https://img.shields.io/badge/Vulkan-AC162C?style=flat-square&logo=vulkan&logoColor=white">
   <img alt="Proton" src="https://img.shields.io/badge/Proton-1A9FFF?style=flat-square&logo=steam&logoColor=white">
   <a href="https://pepy.tech/project/penguin-burner"><img alt="PyPI downloads" src="https://img.shields.io/pepy/dt/penguin-burner?style=flat-square&logo=pypi&logoColor=white&label=PyPI%20downloads"></a>
@@ -22,6 +22,9 @@
 PenguinBurner is an open-source NVIDIA GPU tuning app for Linux with
 automatic undervolting, overclocking and adaptive per-game profiles for
 **Steam and Lutris** in one [Game Library](#game-library).
+
+> [!NOTE]
+> **RTX 20 Series Fork:** This fork adds full Auto-UV and runtime tuning support for NVIDIA GeForce RTX 20-series (Turing) cards (RTX 2060, 2070, 2080). See [docs/RTX20_SUPPORT.md](docs/RTX20_SUPPORT.md) for details.
 
 **One scan. Three verified GPU profiles.**
 
@@ -37,7 +40,7 @@ Balanced held roughly the same loaded clock at 272 W — about 69 W less.
 
 Verified RTX 5080 examples; every GPU differs. Loaded clocks can fall below
 the requested target under power or thermal limits.
-Pre-optimized targets are included for RTX 30, 40, and 50 series cards.
+Pre-optimized targets are included for RTX 20, 30, 40, and 50 series cards.
 
 ## Install
 

@@ -16,8 +16,8 @@ def build_runtime_default_plan(points: list[dict]) -> list[dict]:
         {
             "index": int(point["index"]),
             "voltage_mv": int(point["voltage_uv"]) // 1000,
-            "base_mhz": int(point["base_freq_khz"]) // 1000,
-            "target_mhz": int(point["base_freq_khz"]) // 1000,
+            "base_mhz": int(point.get("base_freq_khz") or point.get("freq_khz", 0)) // 1000,
+            "target_mhz": int(point.get("base_freq_khz") or point.get("freq_khz", 0)) // 1000,
             "current_offset_mhz": int(point["current_offset_khz"]) // 1000,
             "new_offset_mhz": 0,
             "preserve_base": False,

@@ -271,6 +271,7 @@ def scan_command(auto_uv_options: Mapping[str, object] | None = None) -> list[st
         payload[key] = value
     return [
         sys.executable,
+        "-P",
         "-m",
         "runtime.daemon_client",
         "start-auto-uv",
@@ -322,6 +323,7 @@ def runtime_profile_command(
     }
     return [
         sys.executable,
+        "-P",
         "-m",
         "runtime.daemon_client",
         "apply-runtime-intent",
@@ -413,6 +415,7 @@ def profile_verify_command(
         payload["auto_uv_profile"] = str(profile_selector)
     return [
         sys.executable,
+        "-P",
         "-m",
         "runtime.daemon_client",
         "start-profile-verification",
@@ -425,6 +428,7 @@ def delete_profiles_command(profile_paths: list[str]) -> list[str]:
     # the daemon path-validates against the saved-profiles dir before deleting.
     return [
         sys.executable,
+        "-P",
         "-m",
         "runtime.daemon_client",
         "delete-auto-uv-profiles",

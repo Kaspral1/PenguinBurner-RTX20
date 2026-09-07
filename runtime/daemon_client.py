@@ -9,6 +9,9 @@ import socket
 import sys
 from typing import Any
 
+if sys.path and sys.path[0] in ("", ".", str(Path.cwd())):
+    sys.path.pop(0)
+
 
 DEFAULT_DAEMON_SOCKET = "/run/penguin-burnerd.sock"
 

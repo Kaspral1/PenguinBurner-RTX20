@@ -1,7 +1,7 @@
 # Install PenguinBurner
 
-Install the NVIDIA proprietary driver and CUDA first. PenguinBurner supports
-RTX 30 (Ampere), RTX 40 (Ada), and RTX 50 (Blackwell) cards.
+Install the NVIDIA proprietary driver and CUDA first. This fork of PenguinBurner
+supports RTX 20 (Turing), RTX 30 (Ampere), RTX 40 (Ada), and RTX 50 (Blackwell) cards.
 
 The driver must provide `libnvidia-ml.so.1` for NVML telemetry/GPU discovery,
 `libnvidia-api.so.1` for NVIDIA V/F curve control, the Vulkan runtime for Q2RTX,

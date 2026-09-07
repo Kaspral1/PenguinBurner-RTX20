@@ -14,10 +14,12 @@ from drivers.nvidia.daemon_gpu import DaemonGpuClient, VfPoint
 
 MINIMUM_NVIDIA_DRIVER_VERSION = (580, 0)
 AUTO_UV_SUPPORT_ISSUE_URL = "https://github.com/jpietek/PenguinBurner/issues/3"
+NVML_DEVICE_ARCH_TURING = 6
 NVML_DEVICE_ARCH_AMPERE = 7
 NVML_DEVICE_ARCH_ADA = 8
 NVML_DEVICE_ARCH_BLACKWELL = 10
 NVML_DEVICE_ARCH_NAMES = {
+    NVML_DEVICE_ARCH_TURING: "Turing",
     NVML_DEVICE_ARCH_AMPERE: "Ampere",
     NVML_DEVICE_ARCH_ADA: "Ada Lovelace",
     NVML_DEVICE_ARCH_BLACKWELL: "Blackwell",
@@ -104,8 +106,8 @@ class InitialCheckResult:
         lines.append(
             "Auto-UV requires an up-to-date Nvidia driver, working NVML/NVAPI "
             "voltage and V/F controls, and a supported GPU: GeForce RTX "
-            "50-series Blackwell, RTX 40-series Ada Lovelace, or RTX 30-series "
-            "Ampere."
+            "50-series Blackwell, RTX 40-series Ada Lovelace, RTX 30-series "
+            "Ampere, or RTX 20-series Turing."
         )
         if self.errors:
             lines.append("")
@@ -178,7 +180,7 @@ def run_auto_uv_initial_check(
                 "Daemon GPU client is unavailable",
                 "PenguinBurner could not open the daemon GPU API."
                 f" Error: {client_error}",
-                "Use an RTX 50-series, RTX 40-series, or RTX 30-series card with "
+                "Use an RTX 50-series, RTX 40-series, RTX 30-series, or RTX 20-series card with "
                 "driver 580.xx or newer.",
             )
         )
@@ -354,13 +356,19 @@ def _validate_vf_curve(reader) -> list[InitialCheckIssue]:
         )
         return issues
 
+    def _effective_base_freq(p):
+        return int(p.get("base_freq_khz", 0) or p.get("freq_khz", 0) or 0)
+
+    def _effective_base_voltage(p):
+        return int(p.get("base_voltage_uv", 0) or p.get("voltage_uv", 0) or 0)
+
     invalid = [
         point
         for point in points
         if int(point.get("voltage_uv", 0) or 0) <= 0
         or int(point.get("freq_khz", 0) or 0) <= 0
-        or int(point.get("base_freq_khz", 0) or 0) <= 0
-        or int(point.get("base_voltage_uv", 0) or 0) <= 0
+        or _effective_base_freq(point) <= 0
+        or _effective_base_voltage(point) <= 0
     ]
     if invalid:
         issues.append(
@@ -379,7 +387,7 @@ def _validate_vf_curve(reader) -> list[InitialCheckIssue]:
         point
         for point in points
         if 600_000 <= int(point.get("voltage_uv", 0) or 0) <= 1_300_000
-        and int(point.get("base_freq_khz", 0) or 0) >= 300_000
+        and _effective_base_freq(point) >= 300_000
     ]
     if len(plausible) < 8:
         issues.append(

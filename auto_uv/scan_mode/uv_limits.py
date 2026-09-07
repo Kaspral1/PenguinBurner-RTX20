@@ -233,6 +233,30 @@ _UV_LIMIT_TARGETS: tuple[dict[str, object], ...] = (
         "performance": (900, 1880),
         "efficiency_power_limit_pct": 80,
     },
+    {
+        "family": "RTX 2080",
+        "patterns": ("2080",),
+        "efficiency": (750, 1500),
+        "balanced": (800, 1680),
+        "performance": (875, 1800),
+        "efficiency_power_limit_pct": 100,
+    },
+    {
+        "family": "RTX 2070",
+        "patterns": ("2070",),
+        "efficiency": (750, 1450),
+        "balanced": (800, 1620),
+        "performance": (875, 1750),
+        "efficiency_power_limit_pct": 100,
+    },
+    {
+        "family": "RTX 2060",
+        "patterns": ("2060",),
+        "efficiency": (750, 1425),
+        "balanced": (800, 1575),
+        "performance": (875, 1725),
+        "efficiency_power_limit_pct": 100,
+    },
 )
 
 
