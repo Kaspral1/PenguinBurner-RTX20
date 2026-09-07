@@ -1,10 +1,10 @@
-# Wsparcie dla kart NVIDIA RTX serii 20 (architektura Turing) w PenguinBurner
+# Wsparcie dla kart NVIDIA RTX serii 20 oraz GTX serii 16 w PenguinBurner
 
-Ten fork rozszerza aplikację **PenguinBurner** o pełną obsługę kart graficznych **NVIDIA GeForce RTX z serii 20 (architektura Turing)**, takich jak RTX 2060, RTX 2070 oraz RTX 2080 (w tym wersji laptopowych / Mobile).
+Ten fork rozszerza aplikację **PenguinBurner** o pełną obsługę kart graficznych **NVIDIA GeForce RTX z serii 20** oraz **GTX z serii 16 (architektura Turing)**, a także układu **RTX 2050 (architektura Ampere GA107)**.
 
 ---
 
-## 1. Przyczyna braku działania w wersji oficjalnej
+## 1. Dlaczego oficjalna wersja nie działała?
 
 W oficjalnej wersji PenguinBurner próba uruchomienia procedury Auto-UV na kartach z rodziny Turing kończyła się błędem:
 ```text
@@ -22,29 +22,27 @@ Errors:
    - Oryginalny kod walidacji PenguinBurner sztywno wymagał `base_freq_khz > 0`, co powodowało fałszywe odrzucanie w pełni sprawnej krzywej.
 2. **Brak mapowania architektury Turing:**
    - Sterownik NVML raportuje dla Turinga identyfikator `6`. W kodzie brakowało definicji `NVML_DEVICE_ARCH_TURING = 6`, co skutkowało komunikatem `architecture unknown (6)`.
-3. **Brak tabeli docelowych profili dla serii 20:**
+3. **Brak tabeli docelowych profili dla serii 20 i 16:**
    - Tabela celów Auto-UV (`_UV_LIMIT_TARGETS`) zawierała wyłącznie wpisy dla serii 30, 40 i 50.
 4. **Przysłanianie modułów przez katalog roboczy (Module Shadowing):**
    - Podprocesy uruchamiane przez interfejs graficzny (`python -m runtime.daemon_client`) dziedziczyły katalog roboczy w `sys.path[0]`. Uruchomienie programu z katalogu zawierającego lokalny plik `profiles.py` powodowało konflikt importu z wewnętrznym pakietem `profiles`.
 
 ---
 
-## 2. Wprowadzone rozwiązania
+## 2. Obsługiwane modele
 
-1. **Obliczanie parametrów bazowych dla kart Turing:**
-   - W plikach `drivers/nvidia/daemon_gpu.py`, `runtime/support/nvidia_runtime_defaults.py` oraz `auto_uv/initial_check/auto_uv_hardware_initial_check.py`: jeśli `base_freq_khz <= 0`, przyjmuje się rzeczywisty zegar bazowy punktu:
-     $$\text{base\_freq\_khz} = \max(\text{freq\_khz} - \text{current\_offset\_khz}, 0)$$
-     a `base_voltage_uv` przyjmuje wartość `voltage_uv`.
-2. **Rozpoznawanie architektury Turing:**
-   - Dodano stałą `NVML_DEVICE_ARCH_TURING = 6` oraz nazwę `"Turing"` do bazy `NVML_DEVICE_ARCH_NAMES`.
-3. **Predefiniowane profile Auto-UV dla serii RTX 20:**
-   - Zdefiniowano profile celów dla RTX 2060, RTX 2070 i RTX 2080:
-     - **RTX 2060:** Efficiency: 750 mV / 1425 MHz | Balanced: 800 mV / 1575 MHz | Performance: 875 mV / 1725 MHz
-     - **RTX 2070:** Efficiency: 750 mV / 1450 MHz | Balanced: 800 mV / 1620 MHz | Performance: 875 mV / 1750 MHz
-     - **RTX 2080:** Efficiency: 750 mV / 1500 MHz | Balanced: 800 mV / 1680 MHz | Performance: 875 mV / 1800 MHz
-     - Limit mocy: 100% (bezpieczny dla zablokowanych TGP w laptopach).
-4. **Izolacja importów Pythona:**
-   - Dodano flagę `-P` do podprocesów oraz usuwanie katalogu roboczego z `sys.path[0]` na wejściu demona klienta.
+W forku dodano zoptymalizowane profile dla całej generacji Turing i pokrewnych kart:
+- **RTX 2080 Ti:** Efficiency: 775 mV / 1600 MHz | Balanced: 825 mV / 1750 MHz | Performance: 875 mV / 1850 MHz
+- **RTX 2080 Super:** Efficiency: 750 mV / 1530 MHz | Balanced: 800 mV / 1700 MHz | Performance: 875 mV / 1815 MHz
+- **RTX 2080:** Efficiency: 750 mV / 1500 MHz | Balanced: 800 mV / 1680 MHz | Performance: 875 mV / 1800 MHz
+- **RTX 2070 Super:** Efficiency: 750 mV / 1470 MHz | Balanced: 800 mV / 1650 MHz | Performance: 875 mV / 1770 MHz
+- **RTX 2070:** Efficiency: 750 mV / 1450 MHz | Balanced: 800 mV / 1620 MHz | Performance: 875 mV / 1750 MHz
+- **RTX 2060 Super:** Efficiency: 750 mV / 1440 MHz | Balanced: 800 mV / 1600 MHz | Performance: 875 mV / 1740 MHz
+- **RTX 2060 (Desktop & Laptop):** Efficiency: 750 mV / 1425 MHz | Balanced: 800 mV / 1575 MHz | Performance: 875 mV / 1725 MHz
+- **RTX 2050 (Mobile, rdzeń Ampere GA107):** Efficiency: 725 mV / 1350 MHz | Balanced: 775 mV / 1475 MHz | Performance: 825 mV / 1600 MHz
+- **GTX 1660 Ti & 1660 Super:** Efficiency: 750 mV / 1500 MHz | Balanced: 800 mV / 1650 MHz | Performance: 875 mV / 1770 MHz
+- **GTX 1660 & 1650 Super:** Efficiency: 750 mV / 1450 MHz | Balanced: 800 mV / 1600 MHz | Performance: 875 mV / 1725 MHz
+- **GTX 1650:** Efficiency: 750 mV / 1400 MHz | Balanced: 800 mV / 1550 MHz | Performance: 850 mV / 1665 MHz
 
 ---
 
@@ -59,8 +57,6 @@ Testy przeprowadzone na **NVIDIA GeForce RTX 2060 Mobile (TGP 80W)**, Linux Mint
 | **Taktowanie rzeczywiste** | 1500 – 1560 MHz | **1660.88 MHz (+100 MHz)** | **1664.64 MHz (+104 MHz)** |
 | **Temperatura maksymalna** | 76 – 82°C | **68 – 70°C** | **65 – 68°C** |
 | **Test stabilności** | — | **PASS (300 s Quake II RTX + CUDA)** | **PASS (300 s Quake II RTX + CUDA)** |
-
-*Wniosek: Obniżenie napięcia na kartach mobilnych eliminuje zjawisko power-throttlingu, dzięki czemu GPU osiąga wyższy stały zegar niż fabrycznie przy znacznie niższych temperaturach.*
 
 ---
 

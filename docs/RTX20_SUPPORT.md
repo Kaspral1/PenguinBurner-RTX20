@@ -1,6 +1,6 @@
-# NVIDIA RTX 20 Series (Turing) Support in PenguinBurner
+# NVIDIA RTX 20 & GTX 16 Series (Turing) Support in PenguinBurner
 
-This fork extends **PenguinBurner** to fully support **NVIDIA GeForce RTX 20-series (Turing architecture)** graphics cards (such as the RTX 2060, RTX 2070, and RTX 2080, including Mobile / Laptop variants).
+This repository extends **PenguinBurner** to fully support **NVIDIA GeForce RTX 20-series** and **GTX 16-series (Turing architecture)** graphics cards, including mobile/laptop variants, as well as the **RTX 2050 (Ampere GA107)**.
 
 ---
 
@@ -18,7 +18,7 @@ Errors:
 ### Technical Root Causes:
 1. **Unpopulated `vf_tuple_base` in NVAPI on Turing:**
    - On Ampere (RTX 30), Ada Lovelace (RTX 40), and Blackwell (RTX 50), NVIDIA drivers populate both current clock/voltage and a separate baseline tuple (`vf_tuple_base`) in `ClockClientClkVfPointsStatusV3`.
-   - On Turing (RTX 20), the driver returns valid live points (128 voltage/frequency points spanning 450 mV to 1243 mV), but leaves `vf_tuple_base` zeroed (`b_vf_tuple_base_supported == 0`).
+   - On Turing (RTX 20 / GTX 16), the driver returns valid live points (128 voltage/frequency points spanning 450 mV to 1243 mV), but leaves `vf_tuple_base` zeroed (`b_vf_tuple_base_supported == 0`).
    - Upstream PenguinBurner strictly asserted `base_freq_khz > 0`, causing it to reject otherwise completely healthy Turing V/F curves.
 2. **Missing Turing Architecture Mapping:**
    - NVML reports architecture code `6` for Turing. The codebase lacked `NVML_DEVICE_ARCH_TURING = 6`, causing the initial check to label the GPU as `architecture unknown (6)`.
@@ -42,22 +42,20 @@ Errors:
 - **File:** `auto_uv/initial_check/auto_uv_hardware_initial_check.py`
 - Defined `NVML_DEVICE_ARCH_TURING = 6` and added `"Turing"` to `NVML_DEVICE_ARCH_NAMES`.
 
-### C. Pre-optimized Auto-UV Targets for RTX 20 Series
+### C. Pre-optimized Auto-UV Targets for RTX 20 & GTX 16 Series
 - **File:** `auto_uv/scan_mode/uv_limits.py`
-- Added target profiles tailored for Turing:
-  - **RTX 2060 (Desktop & Mobile):**
-    - Efficiency: 750 mV / 1425 MHz
-    - Balanced: 800 mV / 1575 MHz
-    - Performance: 875 mV / 1725 MHz
-    - Power limit: 100% (safe for OEM-locked laptop TGPs)
-  - **RTX 2070:**
-    - Efficiency: 750 mV / 1450 MHz
-    - Balanced: 800 mV / 1620 MHz
-    - Performance: 875 mV / 1750 MHz
-  - **RTX 2080:**
-    - Efficiency: 750 mV / 1500 MHz
-    - Balanced: 800 mV / 1680 MHz
-    - Performance: 875 mV / 1800 MHz
+- Added target profiles tailored for the entire generation:
+  - **RTX 2080 Ti:** Efficiency: 775 mV / 1600 MHz | Balanced: 825 mV / 1750 MHz | Performance: 875 mV / 1850 MHz
+  - **RTX 2080 Super:** Efficiency: 750 mV / 1530 MHz | Balanced: 800 mV / 1700 MHz | Performance: 875 mV / 1815 MHz
+  - **RTX 2080:** Efficiency: 750 mV / 1500 MHz | Balanced: 800 mV / 1680 MHz | Performance: 875 mV / 1800 MHz
+  - **RTX 2070 Super:** Efficiency: 750 mV / 1470 MHz | Balanced: 800 mV / 1650 MHz | Performance: 875 mV / 1770 MHz
+  - **RTX 2070:** Efficiency: 750 mV / 1450 MHz | Balanced: 800 mV / 1620 MHz | Performance: 875 mV / 1750 MHz
+  - **RTX 2060 Super:** Efficiency: 750 mV / 1440 MHz | Balanced: 800 mV / 1600 MHz | Performance: 875 mV / 1740 MHz
+  - **RTX 2060 (Desktop & Mobile):** Efficiency: 750 mV / 1425 MHz | Balanced: 800 mV / 1575 MHz | Performance: 875 mV / 1725 MHz
+  - **RTX 2050 (Mobile, Ampere GA107):** Efficiency: 725 mV / 1350 MHz | Balanced: 775 mV / 1475 MHz | Performance: 825 mV / 1600 MHz
+  - **GTX 1660 Ti & Super:** Efficiency: 750 mV / 1500 MHz | Balanced: 800 mV / 1650 MHz | Performance: 875 mV / 1770 MHz
+  - **GTX 1660 & 1650 Super:** Efficiency: 750 mV / 1450 MHz | Balanced: 800 mV / 1600 MHz | Performance: 875 mV / 1725 MHz
+  - **GTX 1650:** Efficiency: 750 mV / 1400 MHz | Balanced: 800 mV / 1550 MHz | Performance: 850 mV / 1665 MHz
 
 ### D. Subprocess Path Isolation
 - **Files:** `ui/commands.py`, `runtime/daemon_client.py`
